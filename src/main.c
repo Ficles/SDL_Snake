@@ -116,17 +116,22 @@ int main(int argc, char* argv[])
     apple.x = 32 * 16;
     apple.y = 32 * 12;
     int direction = 2;
+    int prev_direction = 2;
     int score = 0;
     int i;
+    int touching;
     long long time_of_last_frame = current_timestamp();
     SDL_Rect *tail;
     SDL_Rect *temp_tail;
+    // Allocate memory for tail arrays
     tail = calloc(1024*769, sizeof(SDL_Rect));
     temp_tail = calloc(1024*768, sizeof(SDL_Rect));
 
-    // Set apple to random position
-    apple.x = (rand() % 31) * 32;
-    apple.y = (rand() % 23) * 32;
+    // Set apple to random position that is not the same as the head
+    while (head.x == apple.x && head.y == apple.y) {
+        apple.x = (rand() % 31) * 32;
+        apple.y = (rand() % 23) * 32;
+    }
 
     while (!close) {
         SDL_Event event;
@@ -141,19 +146,27 @@ int main(int argc, char* argv[])
                     switch (event.key.keysym.scancode) {
                         case SDL_SCANCODE_W:
                         case SDL_SCANCODE_UP:
+                            if (prev_direction != 2) {
                             direction = 0;
+                            }
                             break;
                         case SDL_SCANCODE_A:
                         case SDL_SCANCODE_LEFT:
+                            if (prev_direction != 3) {
                             direction = 1;
+                            }
                             break;
                         case SDL_SCANCODE_S:
                         case SDL_SCANCODE_DOWN:
+                            if (prev_direction != 0) {
                             direction = 2;
+                            }
                             break;
                         case SDL_SCANCODE_D:
                         case SDL_SCANCODE_RIGHT:
+                            if (prev_direction != 1) {
                             direction = 3;
+                            }
                             break;
                     }
             }
@@ -185,10 +198,25 @@ int main(int argc, char* argv[])
         // Detect if the head is overlapping the apple
         if (head.x == apple.x && head.y == apple.y) {
             score++;
+            touching = 1;
 
-            // Set the apple to a new random position
-            apple.x = (rand() % 31) * 32;
-            apple.y = (rand() % 23) * 32;
+            // Set the apple to a new random position that is not overlapping the snake
+            while (touching) {
+                apple.x = (rand() % 31) * 32;
+                apple.y = (rand() % 23) * 32;
+
+                i = 0;
+                touching = 0;
+                while (i < score+2) {
+                    if (apple.x == tail[i].x && apple.y == tail[i].y) {
+                        touching = 1;
+                    }
+                    i++;
+                }
+                if (apple.x == head.x && apple.y == head.y) {
+                    touching = 1;
+                }
+            }
         }
 
         // Detect if the head is overlapping the tail
@@ -224,6 +252,8 @@ int main(int argc, char* argv[])
         draw_grid(rend, 32); // Draw grid
 
         SDL_RenderPresent(rend); // Update window
+
+        prev_direction = direction;
 
         // Ensure FPS is 5
         while (current_timestamp() < (time_of_last_frame + 1000/5)) {}
