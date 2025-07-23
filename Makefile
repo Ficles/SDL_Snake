@@ -5,7 +5,7 @@ OBJS = src\main.c
 CC = gcc
 
 #INCLUDE_PATHS specifies the additional include paths we'll need
-INCLUDE_PATHS = -Ilib\SDL2\include\SDL2
+INCLUDE_PATHS = -Ilib\SDL2\include
 
 #LIBRARY_PATHS specifies the additional library paths we'll need
 LIBRARY_PATHS = -Llib\SDL2\lib
