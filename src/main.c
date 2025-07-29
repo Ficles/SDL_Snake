@@ -10,10 +10,16 @@
 
 // Define Colour constants
 const SDL_Color red = {255, 0, 0, 255};
-const SDL_Color d_red = {127, 00, 0, 255};
+const SDL_Color d_red = {172, 00, 0, 255};
 const SDL_Color blue = {0, 0, 255, 255};
 const SDL_Color white = {255, 255, 255, 255};
 const SDL_Color black = {0, 0, 0, 255};
+const int speed = 5;
+const int grid_size = 32;
+const int grid_width = 16;
+const int grid_height = 12;
+const int screen_width = grid_size * grid_width;
+const int screen_height = grid_size * grid_height;
 
 int draw_filled_rect(SDL_Renderer* renderer, SDL_Rect* rect, SDL_Color color)
 {
@@ -48,19 +54,19 @@ int draw_rect(SDL_Renderer* renderer, SDL_Rect* rect, SDL_Color color, int borde
 int draw_grid(SDL_Renderer* renderer, int square_size)
 {
     // Draw vertical lines spaced "square_size" apart until the end of the screen
-    int i = square_size; 
-    while (i < 1024) {
+    int i = 1; 
+    while (i < grid_width) {
         SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, white.a);
-        SDL_RenderDrawLine(renderer, i, 0, i, 768);
-        i += square_size;
+        SDL_RenderDrawLine(renderer, i*grid_size, 0, i*grid_size, screen_height);
+        i++;
     }
 
     // Draw horizontal lines spaced "square_size" apart until the end of the screen
-    i = square_size;
-    while (i < 768) {
+    i = 1;
+    while (i < grid_height) {
         SDL_SetRenderDrawColor(renderer, white.r, white.g, white.b, white.a);
-        SDL_RenderDrawLine(renderer, 0, i, 1024, i);
-        i += square_size;
+        SDL_RenderDrawLine(renderer, 0, i*grid_size, screen_width, i*grid_size);
+        i++;
     }
 
     SDL_SetRenderDrawColor(renderer, black.r, black.g, black.b, black.a);
@@ -90,8 +96,8 @@ int main(int argc, char* argv[])
         "Snake",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
-        1024,
-        768,
+        screen_width,
+        screen_height,
         0
     );
 
@@ -106,15 +112,15 @@ int main(int argc, char* argv[])
     // Define variables
     int close = 0;
     SDL_Rect head;
-    head.w = 32;
-    head.h = 32;
-    head.x = 32 * 16;
-    head.y = 32 * 12;
+    head.w = grid_size;
+    head.h = grid_size;
+    head.x = grid_size * (grid_width / 2);
+    head.y = grid_size * (grid_height / 2);
     SDL_Rect apple;
-    apple.w = 32;
-    apple.h = 32;
-    apple.x = 32 * 16;
-    apple.y = 32 * 12;
+    apple.w = grid_size;
+    apple.h = grid_size;
+    apple.x = grid_size * (grid_width / 2);
+    apple.y = grid_size * (grid_height / 2);
     int direction = 2;
     int prev_direction = 2;
     int score = 0;
@@ -124,13 +130,13 @@ int main(int argc, char* argv[])
     SDL_Rect *tail;
     SDL_Rect *temp_tail;
     // Allocate memory for tail arrays
-    tail = calloc(1024*769, sizeof(SDL_Rect));
-    temp_tail = calloc(1024*768, sizeof(SDL_Rect));
+    tail = calloc((grid_width*grid_height)+1, sizeof(SDL_Rect));
+    temp_tail = calloc(grid_width*grid_height, sizeof(SDL_Rect));
 
     // Set apple to random position that is not the same as the head
     while (head.x == apple.x && head.y == apple.y) {
-        apple.x = (rand() % 31) * 32;
-        apple.y = (rand() % 23) * 32;
+        apple.x = (rand() % grid_width) * grid_size;
+        apple.y = (rand() % grid_height) * grid_size;
     }
 
     while (!close) {
@@ -182,16 +188,16 @@ int main(int argc, char* argv[])
         // Move head
         switch (direction) {
             case 0:
-                head.y -= 32;
+                head.y -= grid_size;
                 break;
             case 1:
-                head.x -= 32;
+                head.x -= grid_size;
                 break;
             case 2:
-                head.y += 32;
+                head.y += grid_size;
                 break;
             case 3:
-                head.x += 32;
+                head.x += grid_size;
                 break;
         }
 
@@ -202,8 +208,8 @@ int main(int argc, char* argv[])
 
             // Set the apple to a new random position that is not overlapping the snake
             while (touching) {
-                apple.x = (rand() % 31) * 32;
-                apple.y = (rand() % 23) * 32;
+                apple.x = (rand() % grid_width) * grid_size;
+                apple.y = (rand() % grid_height) * grid_size;
 
                 i = 0;
                 touching = 0;
@@ -232,7 +238,7 @@ int main(int argc, char* argv[])
         if (head.x < 0 || head.y < 0) {
             close = 1;
         } 
-        if (head.x > 1024 || head.y > 768) {
+        if (head.x >= screen_width || head.y >= screen_height) {
             close = 1;
         }
 
@@ -249,25 +255,27 @@ int main(int argc, char* argv[])
 
         draw_filled_rect(rend, &head, red); // Draw head
 
-        draw_grid(rend, 32); // Draw grid
+        draw_grid(rend, grid_size); // Draw grid
 
         SDL_RenderPresent(rend); // Update window
 
         prev_direction = direction;
 
         // Ensure FPS is 5
-        while (current_timestamp() < (time_of_last_frame + 1000/5)) {}
+        while (current_timestamp() < (time_of_last_frame + 1000/speed)) {}
         time_of_last_frame = current_timestamp();
     }
 
-    printf("Score: %d\n", score); // Announce final score
+    SDL_DestroyRenderer(rend);
+    SDL_DestroyWindow(win);
+
+    printf("Final score: %d\n", score); // Announce final score
+    SDL_Delay(3000);
 
     // Clear memory
     free(tail);
     free(temp_tail);
 
-    SDL_DestroyRenderer(rend);
-    SDL_DestroyWindow(win);
     SDL_Quit();
 
     return 0;
