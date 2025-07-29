@@ -127,6 +127,8 @@ int main(int argc, char* argv[])
     int i;
     int touching;
     long long time_of_last_frame = current_timestamp();
+    char name[16];
+    snprintf(name, sizeof(name), "Snake: %d", score); 
     SDL_Rect *tail;
     SDL_Rect *temp_tail;
     // Allocate memory for tail arrays
@@ -256,6 +258,10 @@ int main(int argc, char* argv[])
         draw_filled_rect(rend, &head, red); // Draw head
 
         draw_grid(rend, grid_size); // Draw grid
+
+        // Add the current score to the window title
+        snprintf(name, sizeof(name), "Snake: %d", score);
+        SDL_SetWindowTitle(win, name);
 
         SDL_RenderPresent(rend); // Update window
 
