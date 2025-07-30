@@ -14,12 +14,12 @@ const SDL_Color d_red = {172, 00, 0, 255};
 const SDL_Color blue = {0, 0, 255, 255};
 const SDL_Color white = {255, 255, 255, 255};
 const SDL_Color black = {0, 0, 0, 255};
-const int speed = 5;
-const int grid_size = 32;
-const int grid_width = 16;
-const int grid_height = 12;
-const int screen_width = grid_size * grid_width;
-const int screen_height = grid_size * grid_height;
+int speed;
+int grid_size;
+int grid_width;
+int grid_height;
+int screen_width;
+int screen_height;
 
 int draw_filled_rect(SDL_Renderer* renderer, SDL_Rect* rect, SDL_Color color)
 {
@@ -84,6 +84,36 @@ long long current_timestamp() {
 
 int main(int argc, char* argv[])
 {
+    // Get config
+    FILE* config = fopen("config.txt", "r");
+    if (config == NULL) {
+        printf("Error opening config.txt, writing default values.\n");
+        // Reopen config.txt for writing
+        fclose(config);
+        config = fopen("config.txt", "w");
+        if (config == NULL) {
+            printf("Error creating config.txt, exiting.\n");
+            return 1;
+        }
+
+        // Set default values
+        grid_size = 24;
+        grid_width = 16;
+        grid_height = 12;
+        speed = 5;
+        screen_width = grid_size * grid_width;
+        screen_height = grid_size * grid_height;
+
+        fprintf(config, "grid_size:%d\ngrid_width:%d\ngrid_height:%d\nspeed:%d", grid_size, grid_width, grid_height, speed);
+        fclose(config);
+    } else {
+        fscanf(config, "grid_size:%d\ngrid_width:%d\ngrid_height:%d\nspeed:%d", &grid_size, &grid_width, &grid_height, &speed);
+        fclose(config);
+
+        screen_width = grid_size * grid_width;
+        screen_height = grid_size * grid_height;
+    }
+
     srand(time(NULL)); // Set random number seed
 
     // Init SDL
@@ -276,7 +306,8 @@ int main(int argc, char* argv[])
     SDL_DestroyWindow(win);
 
     printf("Final score: %d\n", score); // Announce final score
-    SDL_Delay(3000);
+    printf("Press enter to exit...");
+    while (getchar() != '\n') // Wait for user input before closing
 
     // Clear memory
     free(tail);

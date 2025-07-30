@@ -1,0 +1,4 @@
+grid_size:32
+grid_width:16
+grid_height:12
+speed:3
