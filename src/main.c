@@ -302,18 +302,21 @@ int main(int argc, char* argv[])
         time_of_last_frame = current_timestamp();
     }
 
+    // Clean up SDL resources
     SDL_DestroyRenderer(rend);
     SDL_DestroyWindow(win);
-
-    printf("Final score: %d\n", score); // Announce final score
-    printf("Press enter to exit...");
-    while (getchar() != '\n') // Wait for user input before closing
+    SDL_Quit();
 
     // Clear memory
     free(tail);
     free(temp_tail);
 
-    SDL_Quit();
+    // Announce final score
+    printf("Your final score: %d\n", score);
+    
+    // Wait for user input before closing
+    printf("Press enter to exit...");
+    while (getchar() != '\n')
 
     return 0;
 }
