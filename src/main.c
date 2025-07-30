@@ -8,7 +8,7 @@
 
 #define noop
 
-// Define Colour constants
+// Define game constants
 const SDL_Color red = {255, 0, 0, 255};
 const SDL_Color d_red = {172, 00, 0, 255};
 const SDL_Color blue = {0, 0, 255, 255};
