@@ -1,4 +1,4 @@
-grid_size:24
-grid_width:16
-grid_height:12
-speed:5
+grid_size:32
+grid_width:20
+grid_height:20
+speed:6

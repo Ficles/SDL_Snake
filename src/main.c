@@ -140,6 +140,7 @@ int main(int argc, char* argv[])
     SDL_SetRenderDrawBlendMode(rend, SDL_BLENDMODE_ADD);
 
     // Define variables
+    const Uint8* keystate = SDL_GetKeyboardState(NULL);
     int close = 0;
     SDL_Rect head;
     head.w = grid_size;
@@ -206,7 +207,30 @@ int main(int argc, char* argv[])
                             direction = 3;
                             }
                             break;
-                    }
+                        }
+            }
+        }
+
+        // Held Keyboard input handling
+        SDL_PumpEvents(); // Update keyboard state
+        if(keystate[SDL_SCANCODE_LEFT] || keystate[SDL_SCANCODE_A]) {
+            if (prev_direction != 3) {
+                direction = 1;
+            }
+        }
+        if(keystate[SDL_SCANCODE_RIGHT] || keystate[SDL_SCANCODE_D]) {
+            if (prev_direction != 1) {
+                direction = 3;
+            }
+        }
+        if(keystate[SDL_SCANCODE_UP] || keystate[SDL_SCANCODE_W]) {
+            if (prev_direction != 2) {
+                direction = 0;
+            }
+        }
+        if(keystate[SDL_SCANCODE_DOWN] || keystate[SDL_SCANCODE_S]) {
+            if (prev_direction != 0) {
+                direction = 2;
             }
         }
 
@@ -313,7 +337,7 @@ int main(int argc, char* argv[])
 
     // Announce final score
     printf("Your final score: %d\n", score);
-    
+
     // Wait for user input before closing
     printf("Press enter to exit...");
     while (getchar() != '\n')
